@@ -33,7 +33,7 @@ public class ProductPage extends HttpServlet {
 		if (request.getSession().getAttribute("openid") != null) {
 			String openid = request.getSession().getAttribute("openid")
 					.toString();
-			String url = "http://paysdk.weixin.qq.com/example/JsApiPayPage.aspx?openid="
+			String url = "example/JsApiPayPage.jsp?openid="
 					+ openid + "&total_fee=" + total_fee;
 			response.sendRedirect(url);
 		} else {
