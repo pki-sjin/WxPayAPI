@@ -1,23 +1,21 @@
 package com.wx.pay.business;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.xml.sax.SAXException;
 
 import com.wx.pay.api.WxPayApi;
@@ -67,7 +65,8 @@ public class JsApiPay {
 	 * 网页授权获取用户基本信息的全部过程 详情请参看网页授权获取用户基本信息：http://mp.weixin.qq.com/wiki/17/
 	 * c0f37d5704f0b64713d5d2c37b468d75.html 第一步：利用url跳转获取code
 	 * 第二步：利用code去获取openid和access_token
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 * 
 	 */
 	public void GetOpenidAndAccessToken() throws Exception {
@@ -89,8 +88,9 @@ public class JsApiPay {
 			String url = "https://open.weixin.qq.com/connect/oauth2/authorize?"
 					+ data.ToUrl();
 			Log.debug("Will Redirect to URL : " + url);
-			
-			response.sendRedirect(url); // Java 调用时此处不会像C#一样抛异常，JSP会继续执行，因此在此DEMO中需显示抛出异常中断JSP剩下的工作，实际实现中可以重构使OAth认证更加合理
+
+			response.sendRedirect(url); // Java
+										// 调用时此处不会像C#一样抛异常，JSP会继续执行，因此在此DEMO中需显示抛出异常中断JSP剩下的工作，实际实现中可以重构使OAth认证更加合理
 			throw new Exception("URL redirect");
 		}
 	}
@@ -127,14 +127,13 @@ public class JsApiPay {
 			Log.debug("GetOpenidAndAccessTokenFromCode response : " + result);
 
 			// 保存access_token，用于收货地址获取
-			JsonFactory factory = new JsonFactory();
-			JsonParser jp = factory.createJsonParser(result);
-			JsonNode jd = jp.readValueAsTree();
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, String> jd = mapper.readValue(result, Map.class);
 
-			access_token = jd.get("access_token").asText();
+			access_token = jd.get("access_token");
 
 			// 获取用户openid
-			openid = jd.get("openid").asText();
+			openid = jd.get("openid");
 
 			Log.debug("Get openid : " + openid);
 			Log.debug("Get access_token : " + access_token);
