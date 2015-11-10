@@ -78,7 +78,7 @@ public class JsApiPay {
 		} else {
 			// 构造网页授权获取code的URL
 			String host = request.getRequestURL().toString();
-			String redirect_uri = URLEncoder.encode("http://" + host, "UTF-8");
+			String redirect_uri = URLEncoder.encode(host, "UTF-8");
 			WxPayData data = new WxPayData();
 			data.SetValue("appid", WxPayConfig.APPID);
 			data.SetValue("redirect_uri", redirect_uri);
@@ -236,7 +236,7 @@ public class JsApiPay {
 			String host = request.getRequestURL().toString();
 			String queryString = request.getQueryString();
 			// 这个地方要注意，参与签名的是网页授权获取用户信息时微信后台回传的完整url
-			String url = "http://" + host
+			String url = host
 					+ (queryString != null ? ("?" + queryString) : "");
 
 			// 构造需要用SHA1算法加密的数据
