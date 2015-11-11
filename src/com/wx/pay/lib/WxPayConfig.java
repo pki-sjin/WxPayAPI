@@ -6,10 +6,10 @@ public class WxPayConfig {
 	 * 微信公众号信息配置 APPID：绑定支付的APPID（必须配置） MCHID：商户号（必须配置）
 	 * KEY：商户支付密钥，参考开户邮件设置（必须配置） APPSECRET：公众帐号secert（仅JSAPI支付的时候需要配置）
 	 */
-	public static String APPID = "wx2428e34e0e7dc6ef";
-	public static String MCHID = "1233410002";
-	public static String KEY = "e10adc3849ba56abbe56e056f20f883e";
-	public static String APPSECRET = "51c56b886b5be869567dd389b3e5d1d6";
+	public static String APPID = "wx744a5f3859265b34";
+	public static String MCHID = "1264712401";
+	public static String KEY = "zhizhanlianmeng2tshanghairuiruan";
+	public static String APPSECRET = "30f603652cb84d9f736190180bf8f58c";
 
 	// =======【证书路径设置】=====================================
 	/*
@@ -22,7 +22,7 @@ public class WxPayConfig {
 	/*
 	 * 支付结果通知回调url，用于商户接收支付结果
 	 */
-	public static String NOTIFY_URL = "http://paysdk.weixin.qq.com/example/ResultNotifyPage.jsp";
+	public static String NOTIFY_URL = "http://www.resss.com/WxPayAPI/example/ResultNotifyPage.jsp";
 
 	// =======【商户系统后台机器IP】=====================================
 	/*

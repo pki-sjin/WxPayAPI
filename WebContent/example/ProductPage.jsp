@@ -14,27 +14,12 @@
 	///     nonceStr: 随机字符串
 	/// </summary>
 	Logger Log = Logger.getLogger(this.getClass());
-	String wxEditAddrParam = null;
-	Log.info("page load");
-	if (!("POST".equalsIgnoreCase(request.getMethod()) && (request
-			.getRemoteHost() != null && request
-			.getRemoteHost()
-			.toString()
-			.equalsIgnoreCase(
-					request.getScheme() + "://"
-							+ request.getServerName())))) {
-		JsApiPay jsApiPay = new JsApiPay(request, response);
-		try {
-			//调用【网页授权获取用户信息】接口获取用户的openid和access_token
-			jsApiPay.GetOpenidAndAccessToken();
+	String self = (String) session.getAttribute("openid");
 
-			//获取收货地址js函数入口参数
-			wxEditAddrParam = jsApiPay.GetEditAddressParameters();
-			session.setAttribute("openid", jsApiPay.openid);
-		} catch (Exception ex) {
-			out.write("<span style='color:#FF0000;font-size:20px'>"
-					+ "页面加载出错，请重试" + "</span>");
-		}
+	if (self == null) {
+		// redirect to get openid
+		JsApiPay.requestOpenId(request, response);
+		return;
 	}
 %>
 <!DOCTYPE html>
@@ -45,35 +30,6 @@
 <title>微信支付样例-JSAPI支付</title>
 </head>
 <script type="text/javascript">
-	//获取共享地址
-	function editAddress() {
-		WeixinJSBridge.invoke('editAddress',
-<%=wxEditAddrParam%>
-	, //josn串
-		function(res) {
-			var addr1 = res.proviceFirstStageName;
-			var addr2 = res.addressCitySecondStageName;
-			var addr3 = res.addressCountiesThirdStageName;
-			var addr4 = res.addressDetailInfo;
-			var tel = res.telNumber;
-			var addr = addr1 + addr2 + addr3 + addr4;
-			alert(addr + ":" + tel);
-		});
-	}
-
-	window.onload = function() {
-		if (typeof WeixinJSBridge == "undefined") {
-			if (document.addEventListener) {
-				document.addEventListener('WeixinJSBridgeReady', editAddress,
-						false);
-			} else if (document.attachEvent) {
-				document.attachEvent('WeixinJSBridgeReady', editAddress);
-				document.attachEvent('onWeixinJSBridgeReady', editAddress);
-			}
-		} else {
-			editAddress();
-		}
-	};
 </script>
 <body>
 	<form action="ProductPage" method="get">

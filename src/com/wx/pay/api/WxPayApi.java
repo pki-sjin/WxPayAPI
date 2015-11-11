@@ -54,7 +54,7 @@ public class WxPayApi {
 		inputObj.SetValue("mch_id", WxPayConfig.MCHID);// 商户号
 		inputObj.SetValue("nonce_str",
 				UUID.randomUUID().toString().replaceAll("-", ""));// 随机字符串
-		inputObj.SetValue("sign", inputObj.MakeSign());// 签名
+		inputObj.SetValue("sign", inputObj.MakeSign("MD5"));// 签名
 		String xml = inputObj.ToXml();
 
 		long start = System.currentTimeMillis();// 请求开始时间
@@ -103,7 +103,7 @@ public class WxPayApi {
 		inputObj.SetValue("appid", WxPayConfig.APPID);// 公众账号ID
 		inputObj.SetValue("mch_id", WxPayConfig.MCHID);// 商户号
 		inputObj.SetValue("nonce_str", WxPayApi.GenerateNonceStr());// 随机字符串
-		inputObj.SetValue("sign", inputObj.MakeSign());// 签名
+		inputObj.SetValue("sign", inputObj.MakeSign("MD5"));// 签名
 
 		String xml = inputObj.ToXml();
 
@@ -154,7 +154,7 @@ public class WxPayApi {
 		inputObj.SetValue("appid", WxPayConfig.APPID);// 公众账号ID
 		inputObj.SetValue("mch_id", WxPayConfig.MCHID);// 商户号
 		inputObj.SetValue("nonce_str", GenerateNonceStr());// 随机字符串
-		inputObj.SetValue("sign", inputObj.MakeSign());// 签名
+		inputObj.SetValue("sign", inputObj.MakeSign("MD5"));// 签名
 		String xml = inputObj.ToXml();
 
 		long start = System.currentTimeMillis();// 请求开始时间
@@ -214,7 +214,7 @@ public class WxPayApi {
 		inputObj.SetValue("mch_id", WxPayConfig.MCHID);// 商户号
 		inputObj.SetValue("nonce_str",
 				UUID.randomUUID().toString().replaceAll("-", ""));// 随机字符串
-		inputObj.SetValue("sign", inputObj.MakeSign());// 签名
+		inputObj.SetValue("sign", inputObj.MakeSign("MD5"));// 签名
 
 		String xml = inputObj.ToXml();
 		long start = System.currentTimeMillis();
@@ -266,7 +266,7 @@ public class WxPayApi {
 		inputObj.SetValue("appid", WxPayConfig.APPID);// 公众账号ID
 		inputObj.SetValue("mch_id", WxPayConfig.MCHID);// 商户号
 		inputObj.SetValue("nonce_str", GenerateNonceStr());// 随机字符串
-		inputObj.SetValue("sign", inputObj.MakeSign());// 签名
+		inputObj.SetValue("sign", inputObj.MakeSign("MD5"));// 签名
 
 		String xml = inputObj.ToXml();
 
@@ -314,7 +314,7 @@ public class WxPayApi {
 		inputObj.SetValue("appid", WxPayConfig.APPID);// 公众账号ID
 		inputObj.SetValue("mch_id", WxPayConfig.MCHID);// 商户号
 		inputObj.SetValue("nonce_str", GenerateNonceStr());// 随机字符串
-		inputObj.SetValue("sign", inputObj.MakeSign());// 签名
+		inputObj.SetValue("sign", inputObj.MakeSign("MD5"));// 签名
 
 		String xml = inputObj.ToXml();
 
@@ -362,7 +362,7 @@ public class WxPayApi {
 		inputObj.SetValue("appid", WxPayConfig.APPID);// 公众账号ID
 		inputObj.SetValue("mch_id", WxPayConfig.MCHID);// 商户号
 		inputObj.SetValue("nonce_str", GenerateNonceStr());// 随机字符串
-		inputObj.SetValue("sign", inputObj.MakeSign());// 签名
+		inputObj.SetValue("sign", inputObj.MakeSign("MD5"));// 签名
 		String xml = inputObj.ToXml();
 
 		long start = System.currentTimeMillis();// 请求开始时间
@@ -436,7 +436,7 @@ public class WxPayApi {
 		inputObj.SetValue("nonce_str", GenerateNonceStr());// 随机字符串
 
 		// 签名
-		inputObj.SetValue("sign", inputObj.MakeSign());
+		inputObj.SetValue("sign", inputObj.MakeSign("MD5"));
 		String xml = inputObj.ToXml();
 
 		long start = System.currentTimeMillis();
@@ -483,7 +483,7 @@ public class WxPayApi {
 		inputObj.SetValue("appid", WxPayConfig.APPID);// 公众账号ID
 		inputObj.SetValue("mch_id", WxPayConfig.MCHID);// 商户号
 		inputObj.SetValue("nonce_str", GenerateNonceStr());// 随机字符串
-		inputObj.SetValue("sign", inputObj.MakeSign());// 签名
+		inputObj.SetValue("sign", inputObj.MakeSign("MD5"));// 签名
 		String xml = inputObj.ToXml();
 
 		long start = System.currentTimeMillis();// 请求开始时间
@@ -611,7 +611,7 @@ public class WxPayApi {
 		inputObj.SetValue("time", new SimpleDateFormat("yyyyMMddHHmmss")
 				.format(Calendar.getInstance().getTime()));// 商户上报时间
 		inputObj.SetValue("nonce_str", GenerateNonceStr());// 随机字符串
-		inputObj.SetValue("sign", inputObj.MakeSign());// 签名
+		inputObj.SetValue("sign", inputObj.MakeSign("MD5"));// 签名
 		String xml = inputObj.ToXml();
 
 		Log.info("Report request : " + xml);

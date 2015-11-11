@@ -229,7 +229,7 @@ public class WxPayData {
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException
 	 */
-	public String MakeSign() throws WxPayException, NoSuchAlgorithmException,
+	public String MakeSign(String type) throws WxPayException, NoSuchAlgorithmException,
 			UnsupportedEncodingException {
 		// 转url格式
 		String str = ToUrl();
@@ -276,7 +276,7 @@ public class WxPayData {
 		String return_sign = GetValue("sign").toString();
 
 		// 在本地计算新的签名
-		String cal_sign = MakeSign();
+		String cal_sign = MakeSign("MD5");
 
 		if (cal_sign.equalsIgnoreCase(return_sign)) {
 			return true;

@@ -90,7 +90,7 @@ public class NativeNotify extends Notify {
 		data.SetValue("prepay_id", unifiedOrderResult.GetValue("prepay_id"));
 		data.SetValue("result_code", "SUCCESS");
 		data.SetValue("err_code_des", "OK");
-		data.SetValue("sign", data.MakeSign());
+		data.SetValue("sign", data.MakeSign("MD5"));
 
 		Log.info("UnifiedOrder success , send data to WeChat : " + data.ToXml());
 		PrintWriter print = response.getWriter();
@@ -108,11 +108,11 @@ public class NativeNotify extends Notify {
 		req.SetValue("attach", "test");
 		req.SetValue("out_trade_no", WxPayApi.GenerateOutTradeNo());
 		req.SetValue("total_fee", 1);
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-		Calendar c = Calendar.getInstance();
-		req.SetValue("time_start", dateFormat.format(c.getTime()));
-		c.add(Calendar.MINUTE, 10);
-		req.SetValue("time_expire", dateFormat.format(c.getTime()));
+//		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+//		Calendar c = Calendar.getInstance();
+//		req.SetValue("time_start", dateFormat.format(c.getTime()));
+//		c.add(Calendar.MINUTE, 10);
+//		req.SetValue("time_expire", dateFormat.format(c.getTime()));
 
 		req.SetValue("goods_tag", "test");
 		req.SetValue("trade_type", "NATIVE");

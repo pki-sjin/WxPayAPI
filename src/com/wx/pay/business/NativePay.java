@@ -43,7 +43,7 @@ public class NativePay {
 		data.SetValue("time_stamp", WxPayApi.GenerateTimeStamp());// 时间戳
 		data.SetValue("nonce_str", WxPayApi.GenerateNonceStr());// 随机字符串
 		data.SetValue("product_id", productId);// 商品ID
-		data.SetValue("sign", data.MakeSign());// 签名
+		data.SetValue("sign", data.MakeSign("MD5"));// 签名
 		String str = ToUrlParams(data.GetValues());// 转换为URL串
 		String url = "weixin://wxpay/bizpayurl?" + str;
 
@@ -73,11 +73,11 @@ public class NativePay {
 		data.SetValue("attach", "test");// 附加数据
 		data.SetValue("out_trade_no", WxPayApi.GenerateOutTradeNo());// 随机字符串
 		data.SetValue("total_fee", 1);// 总金额
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-		Calendar c = Calendar.getInstance();
-		data.SetValue("time_start", dateFormat.format(c.getTime()));// 交易起始时间
-		c.add(Calendar.MINUTE, 10);
-		data.SetValue("time_expire", dateFormat.format(c.getTime()));// 交易结束时间
+//		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+//		Calendar c = Calendar.getInstance();
+//		data.SetValue("time_start", dateFormat.format(c.getTime()));// 交易起始时间
+//		c.add(Calendar.MINUTE, 10);
+//		data.SetValue("time_expire", dateFormat.format(c.getTime()));// 交易结束时间
 
 		data.SetValue("goods_tag", "jjj");// 商品标记
 		data.SetValue("trade_type", "NATIVE");// 交易类型

@@ -29,36 +29,13 @@ public class JsApiPay {
 	private static Logger Log = Logger.getLogger(JsApiPay.class);
 
 	// / <summary>
-	// / 保存页面对象，因为要在类的方法中使用Page的Request对象
-	// / </summary>
-	private HttpServletRequest request;
-
-	private HttpServletResponse response;
-
-	// / <summary>
-	// / openid用于调用统一下单接口
-	// / </summary>
-	public String openid;
-
-	// / <summary>
 	// / access_token用于获取收货地址js函数入口参数
 	// / </summary>
-	public String access_token;
+	private static String access_token = null;
+	private static long request_access_token_time = 0;
 
-	// / <summary>
-	// / 商品金额，用于统一下单
-	// / </summary>
-	public int total_fee;
-
-	// / <summary>
-	// / 统一下单接口返回结果
-	// / </summary>
-	public WxPayData unifiedOrderResult;
-
-	public JsApiPay(HttpServletRequest request, HttpServletResponse response) {
-		this.request = request;
-		this.response = response;
-	}
+	private static String jsapi_ticket = null;
+	private static long request_jsapi_ticket_time = 0;
 
 	/**
 	 * 
@@ -69,30 +46,22 @@ public class JsApiPay {
 	 * @throws Exception
 	 * 
 	 */
-	public void GetOpenidAndAccessToken() throws Exception {
-		String code = request.getParameter("code");
-		if (code != null && !code.isEmpty()) {
-			// 获取code码，以获取openid和access_token
-			Log.debug("Get code : " + code);
-			GetOpenidAndAccessTokenFromCode(code);
-		} else {
-			// 构造网页授权获取code的URL
-			String host = request.getRequestURL().toString();
-			String redirect_uri = URLEncoder.encode(host, "UTF-8");
-			WxPayData data = new WxPayData();
-			data.SetValue("appid", WxPayConfig.APPID);
-			data.SetValue("redirect_uri", redirect_uri);
-			data.SetValue("response_type", "code");
-			data.SetValue("scope", "snsapi_base");
-			data.SetValue("state", "STATE" + "#wechat_redirect");
-			String url = "https://open.weixin.qq.com/connect/oauth2/authorize?"
-					+ data.ToUrl();
-			Log.debug("Will Redirect to URL : " + url);
+	public static void requestOpenId(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		String host = request.getRequestURL().toString();
+		host = host.replaceAll(request.getServletPath(), "/OpenIdHandler");
+		String redirect_uri = URLEncoder.encode(host, "UTF-8");
+		WxPayData data = new WxPayData();
+		data.SetValue("appid", WxPayConfig.APPID);
+		data.SetValue("redirect_uri", redirect_uri);
+		data.SetValue("response_type", "code");
+		data.SetValue("scope", "snsapi_base");
+		data.SetValue("state", "STATE" + "#wechat_redirect");
+		String url = "https://open.weixin.qq.com/connect/oauth2/authorize?"
+				+ data.ToUrl();
+		Log.debug("Will Redirect to URL : " + url);
 
-			response.sendRedirect(url); // Java
-										// 调用时此处不会像C#一样抛异常，JSP会继续执行，因此在此DEMO中需显示抛出异常中断JSP剩下的工作，实际实现中可以重构使OAth认证更加合理
-			throw new Exception("URL redirect");
-		}
+		response.sendRedirect(url);
 	}
 
 	/**
@@ -109,38 +78,34 @@ public class JsApiPay {
 	 * 
 	 * @失败时抛异常WxPayException
 	 */
-	public void GetOpenidAndAccessTokenFromCode(String code)
-			throws WxPayException {
-		try {
-			// 构造获取openid及access_token的url
-			WxPayData data = new WxPayData();
-			data.SetValue("appid", WxPayConfig.APPID);
-			data.SetValue("secret", WxPayConfig.APPSECRET);
-			data.SetValue("code", code);
-			data.SetValue("grant_type", "authorization_code");
-			String url = "https://api.weixin.qq.com/sns/oauth2/access_token?"
-					+ data.ToUrl();
+	public static String getOpenId(String code) throws Exception {
+		Log.debug("Get code : " + code);
+		WxPayData data = new WxPayData();
+		data.SetValue("appid", WxPayConfig.APPID);
+		data.SetValue("secret", WxPayConfig.APPSECRET);
+		data.SetValue("code", code);
+		data.SetValue("grant_type", "authorization_code");
+		String url = "https://api.weixin.qq.com/sns/oauth2/access_token?"
+				+ data.ToUrl();
 
-			// 请求url以获取数据
-			String result = HttpService.Get(url);
+		// 请求url以获取数据
+		String result = HttpService.Get(url);
 
-			Log.debug("GetOpenidAndAccessTokenFromCode response : " + result);
+		Log.debug("GetOpenidAndAccessTokenFromCode response : " + result);
 
-			// 保存access_token，用于收货地址获取
-			ObjectMapper mapper = new ObjectMapper();
-			Map<String, String> jd = mapper.readValue(result, Map.class);
+		// 保存access_token，用于收货地址获取
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, String> jd = mapper.readValue(result, Map.class);
 
-			access_token = jd.get("access_token");
+		String access_token = jd.get("access_token");
 
-			// 获取用户openid
-			openid = jd.get("openid");
+		// 获取用户openid
+		String openid = jd.get("openid");
 
-			Log.debug("Get openid : " + openid);
-			Log.debug("Get access_token : " + access_token);
-		} catch (Exception ex) {
-			Log.error(ex.toString());
-			throw new WxPayException(ex.toString());
-		}
+		Log.debug("Get openid : " + openid);
+		Log.debug("Get access_token : " + access_token);
+
+		return openid;
 	}
 
 	/**
@@ -154,20 +119,20 @@ public class JsApiPay {
 	 * @throws NoSuchAlgorithmException
 	 * @失败时抛异常WxPayException
 	 */
-	public WxPayData GetUnifiedOrderResult() throws WxPayException,
-			NoSuchAlgorithmException, ParserConfigurationException,
-			SAXException, IOException {
+	public static WxPayData GetUnifiedOrderResult(String openid,
+			String total_fee) throws WxPayException, NoSuchAlgorithmException,
+			ParserConfigurationException, SAXException, IOException {
 		// 统一下单
 		WxPayData data = new WxPayData();
 		data.SetValue("body", "test");
 		data.SetValue("attach", "test");
 		data.SetValue("out_trade_no", WxPayApi.GenerateOutTradeNo());
 		data.SetValue("total_fee", total_fee);
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-		Calendar c = Calendar.getInstance();
-		data.SetValue("time_start", dateFormat.format(c.getTime()));
-		c.add(Calendar.MINUTE, 10);
-		data.SetValue("time_expire", dateFormat.format(c.getTime()));
+//		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+//		Calendar c = Calendar.getInstance();
+//		data.SetValue("time_start", dateFormat.format(c.getTime()));
+//		c.add(Calendar.DATE, 2);
+//		data.SetValue("time_expire", dateFormat.format(c.getTime()));
 
 		data.SetValue("goods_tag", "test");
 		data.SetValue("trade_type", "JSAPI");
@@ -180,7 +145,6 @@ public class JsApiPay {
 			throw new WxPayException("UnifiedOrder response error!");
 		}
 
-		unifiedOrderResult = result;
 		return result;
 	}
 
@@ -202,9 +166,9 @@ public class JsApiPay {
 	 * @throws JsonGenerationException
 	 * 
 	 */
-	public String GetJsApiParameters() throws NoSuchAlgorithmException,
-			WxPayException, JsonGenerationException, JsonMappingException,
-			IOException {
+	public static WxPayData GetJsApiParameters(WxPayData unifiedOrderResult)
+			throws NoSuchAlgorithmException, WxPayException,
+			JsonGenerationException, JsonMappingException, IOException {
 		Log.debug("JsApiPay::GetJsApiParam is processing...");
 
 		WxPayData jsApiParam = new WxPayData();
@@ -214,12 +178,12 @@ public class JsApiPay {
 		jsApiParam.SetValue("package",
 				"prepay_id=" + unifiedOrderResult.GetValue("prepay_id"));
 		jsApiParam.SetValue("signType", "MD5");
-		jsApiParam.SetValue("paySign", jsApiParam.MakeSign());
+		jsApiParam.SetValue("paySign", jsApiParam.MakeSign("MD5"));
 
 		String parameters = jsApiParam.ToJson();
 
 		Log.debug("Get jsApiParam : " + parameters);
-		return parameters;
+		return jsApiParam;
 	}
 
 	/**
@@ -230,7 +194,8 @@ public class JsApiPay {
 	 * @return string 共享收货地址js函数需要的参数，json格式可以直接做参数使用
 	 * @throws WxPayException
 	 */
-	public String GetEditAddressParameters() throws WxPayException {
+	public String GetEditAddressParameters(HttpServletRequest request)
+			throws WxPayException {
 		String parameter = "";
 		try {
 			String host = request.getRequestURL().toString();
@@ -272,5 +237,53 @@ public class JsApiPay {
 		}
 
 		return parameter;
+	}
+
+	public static String getAccessToken() throws Exception {
+		long current = System.currentTimeMillis();
+		if (access_token == null
+				|| current - request_access_token_time >= 7200000) {
+			WxPayData data = new WxPayData();
+			data.SetValue("appid", WxPayConfig.APPID);
+			data.SetValue("secret", WxPayConfig.APPSECRET);
+			data.SetValue("grant_type", "client_credential");
+			String url = "https://api.weixin.qq.com/cgi-bin/token?"
+					+ data.ToUrl();
+			String result = HttpService.Get(url);
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, String> jd = mapper.readValue(result, Map.class);
+			access_token = jd.get("access_token");
+			request_access_token_time = System.currentTimeMillis();
+		}
+		return access_token;
+	}
+
+	public static String getJsApiTicket(String access_token) throws Exception {
+		long current = System.currentTimeMillis();
+		if (jsapi_ticket == null
+				|| current - request_jsapi_ticket_time >= 7200000) {
+			WxPayData data = new WxPayData();
+			data.SetValue("access_token", access_token);
+			data.SetValue("type", "jsapi");
+			String url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?"
+					+ data.ToUrl();
+			String result = HttpService.Get(url);
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, String> jd = mapper.readValue(result, Map.class);
+			jsapi_ticket = jd.get("ticket");
+			request_jsapi_ticket_time = System.currentTimeMillis();
+		}
+
+		return jsapi_ticket;
+	}
+
+	public static String getSignature(String jsapi_ticket, String nonceStr,
+			long timestamp, String url) throws Exception {
+		WxPayData data = new WxPayData();
+		data.SetValue("jsapi_ticket", jsapi_ticket);
+		data.SetValue("noncestr", nonceStr);
+		data.SetValue("timestamp", timestamp);
+		data.SetValue("url", url);
+		return data.MakeSign("SHA1");
 	}
 }
